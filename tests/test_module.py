@@ -50,6 +50,7 @@ def test_stacked_demo() -> None:
 
     x = str(mod)
     print(x)
+    print(np)
     assert mod.p1.value == 5
     assert mod.non_param == 10
 
