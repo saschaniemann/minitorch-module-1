@@ -41,14 +41,10 @@ class ScalarHistory:
     ctx: Optional[Context] = None
     inputs: Sequence[Scalar] = ()
 
-
-# ## Task 1.2 and 1.4
-# Scalar Forward and Backward
-
 _var_count = 0
 
 
-@dataclass(frozen=True)
+@dataclass
 class Scalar:
     """A reimplementation of scalar values for autodifferentiation
     tracking. Scalar Variables behave as close as possible to standard
@@ -85,11 +81,41 @@ class Scalar:
     def __bool__(self) -> bool:
         return bool(self.data)
 
+    def __add__(self, b: ScalarLike) -> Scalar:
+        return Add.apply(self, b)
+
     def __radd__(self, b: ScalarLike) -> Scalar:
         return self + b
 
     def __rmul__(self, b: ScalarLike) -> Scalar:
         return self * b
+
+    def __lt__(self, b: ScalarLike) -> Scalar:
+        return LT.apply(self, b)
+
+    def __eq__(self, b: ScalarLike) -> Scalar:
+        return EQ.apply(self, b)
+
+    def __sub__(self, b: ScalarLike) -> Scalar:
+        return Add.apply(self, Neg.apply(b))
+
+    def __rsub__(self, b: ScalarLike) -> Scalar:
+        return self - b
+
+    def __neg__(self) -> Scalar:
+        return Neg.apply(self)
+
+    def log(self) -> Scalar:
+        return Log.apply(self)
+
+    def exp(self) -> Scalar:
+        return Exp.apply(self)
+
+    def sigmoid(self) -> Scalar:
+        return Sigmoid.apply(self)
+
+    def relu(self) -> Scalar:
+        return ReLU.apply(self)
 
     # Variable elements for backprop
 
@@ -124,9 +150,11 @@ class Scalar:
         assert h is not None
         assert h.last_fn is not None
         assert h.ctx is not None
+        
+        derivatives = h.last_fn._backward(h.ctx, d_output)
+        variables = h.inputs
 
-        # TODO: Implement for Task 1.3.
-        raise NotImplementedError("Need to implement for Task 1.3")
+        return zip(variables, derivatives)
 
     def backward(self, d_output: Optional[float] = None) -> None:
         """Calls autodiff to fill in the derivatives for the history of this object.
@@ -140,10 +168,6 @@ class Scalar:
         if d_output is None:
             d_output = 1.0
         backpropagate(self, d_output)
-
-    # TODO: Implement for Task 1.2.
-    raise NotImplementedError("Need to implement for Task 1.2")
-
 
 def derivative_check(f: Any, *scalars: Scalar) -> None:
     """Checks that autodiff works on a python function.

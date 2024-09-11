@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Iterable, List, Tuple, Protocol
+from typing import Any, Iterable, Tuple, Protocol
 
 
 # ## Task 1.1
@@ -25,8 +25,9 @@ def central_difference(f: Any, *vals: Any, arg: int = 0, epsilon: float = 1e-6) 
         An approximation of $f'_i(x_0, \ldots, x_{n-1})$
 
     """
-    # TODO: Implement for Task 1.1.
-    raise NotImplementedError("Need to implement for Task 1.1")
+    add = f(*vals[:arg], vals[arg] + epsilon, *vals[arg + 1 :])
+    subsctract = f(*vals[:arg], vals[arg] - epsilon, *vals[arg + 1 :])
+    return (add - subsctract) / (2 * epsilon)
 
 
 variable_count = 1
@@ -60,8 +61,27 @@ def topological_sort(variable: Variable) -> Iterable[Variable]:
         Non-constant Variables in topological order starting from the right.
 
     """
-    # TODO: Implement for Task 1.4.
-    raise NotImplementedError("Need to implement for Task 1.4")
+    variables = []
+    variables_names = set()
+    still_open = [(variable, True)]
+    while len(still_open):
+        (var, first_visit) = still_open[-1]
+        if first_visit:
+            # set first_visit = False
+            still_open[-1] = (still_open[-1][0], False) 
+            # add previous variables with first_visit = True
+            still_open.extend(zip(var.parents, [True]*len(var.parents)))
+        else:
+            still_open.pop()
+            # push var to head of variables
+            if not var.is_constant() and not var.name in variables_names:
+                variables.append(var)
+                variables_names.add(var.name)
+    variables.reverse()
+    return variables
+        
+            
+    
 
 
 def backpropagate(variable: Variable, deriv: Any) -> None:
@@ -76,8 +96,23 @@ def backpropagate(variable: Variable, deriv: Any) -> None:
     No return. Should write to its results to the derivative values of each leaf through `accumulate_derivative`.
 
     """
-    # TODO: Implement for Task 1.4.
-    raise NotImplementedError("Need to implement for Task 1.4")
+    variables = topological_sort(variable=variable)
+    print(list(map(lambda x: x.name, variables)))
+    derivatives = {variables[0].unique_id: deriv}
+
+    for var in variables:
+        if var.is_leaf(): 
+            var.accumulate_derivative(derivatives[var.unique_id])
+            continue
+
+        vars_with_derivatives = var.chain_rule(derivatives[var.unique_id])
+        for v, derivative in vars_with_derivatives:
+            if v.unique_id in derivatives:
+                derivatives[v.unique_id] += derivative
+            else:
+                derivatives[v.unique_id] = derivative
+
+
 
 
 @dataclass

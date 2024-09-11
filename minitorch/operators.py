@@ -107,7 +107,7 @@ def lt(a: float, b: float) -> bool:
         bool: True if `a` is less than `b`, otherwise False.
 
     """
-    return a < b
+    return 1.0 if a < b else 0.0
 
 
 def eq(a: float, b: float) -> bool:
@@ -123,7 +123,7 @@ def eq(a: float, b: float) -> bool:
         bool: True if `a` is equal to `b`, otherwise False.
 
     """
-    return a == b
+    return 1.0 if a == b else 0.0
 
 
 def max(a: float, b: float) -> float:
@@ -156,7 +156,7 @@ def is_close(a: float, b: float) -> bool:
         than 1e-2, otherwise False.
 
     """
-    return abs(a - b) < 1e-2
+    return 1.0 if abs(a - b) < 1e-2 else 0.0
 
 
 def sigmoid(a: float) -> float:
@@ -189,7 +189,7 @@ def relu(a: float) -> float:
         positive, otherwise returns 0.
 
     """
-    return a if a > 0 else 0
+    return a if a > 0 else 0.0
 
 
 def log(a: float) -> float:

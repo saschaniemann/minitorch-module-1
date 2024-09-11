@@ -66,7 +66,7 @@ class Add(ScalarFunction):
 
     @staticmethod
     def forward(ctx: Context, a: float, b: float) -> float:
-        return a + b
+        return operators.add(a, b)
 
     @staticmethod
     def backward(ctx: Context, d_output: float) -> Tuple[float, ...]:
@@ -87,7 +87,108 @@ class Log(ScalarFunction):
         return operators.log_back(a, d_output)
 
 
-# To implement.
+class Mul(ScalarFunction):
+    """Multiply function: f(x, y) = x*y"""
+
+    @staticmethod
+    def forward(ctx: Context, a: float, b: float) -> float:
+        ctx.save_for_backward(a, b)
+        return operators.mul(a, b)
+
+    @staticmethod
+    def backward(ctx: Context, d_output: float) -> float:
+        (a, b) = ctx.saved_values
+        return d_output * b, d_output * a
 
 
-# TODO: Implement for Task 1.2.
+class Inv(ScalarFunction):
+    """Inv function $f(x) = 1 / x$"""
+
+    @staticmethod
+    def forward(ctx: Context, a: float) -> float:
+        ctx.save_for_backward(a)
+        return operators.inv(a)
+
+    @staticmethod
+    def backward(ctx: Context, d_output: float) -> float:
+        (a,) = ctx.saved_values
+        return operators.inv_back(a, d_output)
+
+
+class Neg(ScalarFunction):
+    """Neg function $f(x) = -x$"""
+
+    @staticmethod
+    def forward(ctx: Context, a: float) -> float:
+        return -float(a)
+
+    @staticmethod
+    def backward(ctx: Context, d_output: float) -> float:
+        return -d_output
+
+
+class Sigmoid(ScalarFunction):
+    """Sigmoid function"""
+
+    @staticmethod
+    def forward(ctx: Context, a: float) -> float:
+        ctx.save_for_backward(a)
+        return operators.sigmoid(a)
+
+    @staticmethod
+    def backward(ctx: Context, d_output: float) -> float:
+        (a,) = ctx.saved_values
+        sigm = operators.sigmoid(a)
+        return d_output * sigm * (1 - sigm)
+
+
+class ReLU(ScalarFunction):
+    """ReLU function"""
+
+    @staticmethod
+    def forward(ctx: Context, a: float) -> float:
+        ctx.save_for_backward(a)
+        return operators.relu(a)
+
+    @staticmethod
+    def backward(ctx: Context, d_output: float) -> float:
+        (a,) = ctx.saved_values
+        return operators.relu_back(a, d_output)
+
+
+class Exp(ScalarFunction):
+    """exp function"""
+
+    @staticmethod
+    def forward(ctx: Context, a: float) -> float:
+        ctx.save_for_backward(a)
+        return operators.exp(a)
+
+    @staticmethod
+    def backward(ctx: Context, d_output: float) -> float:
+        (a,) = ctx.saved_values
+        return d_output * operators.exp(a)
+
+
+class LT(ScalarFunction):
+    """Lt function: <"""
+
+    @staticmethod
+    def forward(ctx: Context, a: float, b: float) -> float:
+        return operators.lt(a, b)
+    
+    @staticmethod
+    def backward(ctx: Context, d_output: float) -> float:
+        return 0.0, 0.0
+
+
+class EQ(ScalarFunction):
+    """Eq function: =="""
+
+    @staticmethod
+    def forward(ctx: Context, a: float, b: float) -> float:
+        return operators.eq(a, b)
+    
+    @staticmethod
+    def backward(ctx: Context, d_output: float) -> float:
+        return 0.0, 0.0

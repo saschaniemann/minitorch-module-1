@@ -128,6 +128,7 @@ def test_backprop3() -> None:
     var3 = Function1.apply(0, var1)
     var4 = Function1.apply(var2, var3)
     var4.backward(d_output=5)
+    print(var1.name, var2.name, var3.name, var4.name)
     assert var1.derivative == 10
 
 
