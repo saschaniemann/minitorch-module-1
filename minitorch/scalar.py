@@ -41,10 +41,10 @@ class ScalarHistory:
     ctx: Optional[Context] = None
     inputs: Sequence[Scalar] = ()
 
+
 _var_count = 0
 
 
-@dataclass
 class Scalar:
     """A reimplementation of scalar values for autodifferentiation
     tracking. Scalar Variables behave as close as possible to standard
@@ -53,18 +53,28 @@ class Scalar:
     `ScalarFunction`.
     """
 
+    history: Optional[ScalarHistory]
+    derivative: Optional[float]
     data: float
-    history: Optional[ScalarHistory] = field(default_factory=ScalarHistory)
-    derivative: Optional[float] = None
-    name: str = field(init=False, default="")
-    unique_id: int = field(init=False, default=0)
+    unique_id: int
+    name: str
 
-    def __post_init__(self):
+    def __init__(
+        self,
+        v: float,
+        back: ScalarHistory = ScalarHistory(),
+        name: Optional[str] = None,
+    ):
         global _var_count
         _var_count += 1
-        object.__setattr__(self, "unique_id", _var_count)
-        object.__setattr__(self, "name", str(self.unique_id))
-        object.__setattr__(self, "data", float(self.data))
+        self.unique_id = _var_count
+        self.data = float(v)
+        self.history = back
+        self.derivative = None
+        if name is not None:
+            self.name = name
+        else:
+            self.name = str(self.unique_id)
 
     def __repr__(self) -> str:
         return f"Scalar({self.data})"
@@ -150,7 +160,7 @@ class Scalar:
         assert h is not None
         assert h.last_fn is not None
         assert h.ctx is not None
-        
+
         derivatives = h.last_fn._backward(h.ctx, d_output)
         variables = h.inputs
 
@@ -168,6 +178,7 @@ class Scalar:
         if d_output is None:
             d_output = 1.0
         backpropagate(self, d_output)
+
 
 def derivative_check(f: Any, *scalars: Scalar) -> None:
     """Checks that autodiff works on a python function.

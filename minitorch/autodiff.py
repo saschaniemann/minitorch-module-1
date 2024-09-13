@@ -68,9 +68,9 @@ def topological_sort(variable: Variable) -> Iterable[Variable]:
         (var, first_visit) = still_open[-1]
         if first_visit:
             # set first_visit = False
-            still_open[-1] = (still_open[-1][0], False) 
+            still_open[-1] = (still_open[-1][0], False)
             # add previous variables with first_visit = True
-            still_open.extend(zip(var.parents, [True]*len(var.parents)))
+            still_open.extend(zip(var.parents, [True] * len(var.parents)))
         else:
             still_open.pop()
             # push var to head of variables
@@ -79,9 +79,6 @@ def topological_sort(variable: Variable) -> Iterable[Variable]:
                 variables_names.add(var.name)
     variables.reverse()
     return variables
-        
-            
-    
 
 
 def backpropagate(variable: Variable, deriv: Any) -> None:
@@ -101,7 +98,7 @@ def backpropagate(variable: Variable, deriv: Any) -> None:
     derivatives = {variables[0].unique_id: deriv}
 
     for var in variables:
-        if var.is_leaf(): 
+        if var.is_leaf():
             var.accumulate_derivative(derivatives[var.unique_id])
             continue
 
@@ -111,8 +108,6 @@ def backpropagate(variable: Variable, deriv: Any) -> None:
                 derivatives[v.unique_id] += derivative
             else:
                 derivatives[v.unique_id] = derivative
-
-
 
 
 @dataclass
