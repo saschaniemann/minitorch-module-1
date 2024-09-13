@@ -34,19 +34,19 @@ variable_count = 1
 
 
 class Variable(Protocol):
-    def accumulate_derivative(self, x: Any) -> None: ...
+    def accumulate_derivative(self, x: Any) -> None: ...  # noqa: D102
 
     @property
-    def unique_id(self) -> int: ...
+    def unique_id(self) -> int: ...  # noqa: D102
 
-    def is_leaf(self) -> bool: ...
+    def is_leaf(self) -> bool: ...  # noqa: D102
 
-    def is_constant(self) -> bool: ...
+    def is_constant(self) -> bool: ...  # noqa: D102
 
     @property
-    def parents(self) -> Iterable["Variable"]: ...
+    def parents(self) -> Iterable[Variable]: ...  # noqa: D102
 
-    def chain_rule(self, d_output: Any) -> Iterable[Tuple[Variable, Any]]: ...
+    def chain_rule(self, d_output: Any) -> Iterable[Tuple[Variable, Any]]: ...  # noqa: D102
 
 
 def topological_sort(variable: Variable) -> Iterable[Variable]:
@@ -74,7 +74,7 @@ def topological_sort(variable: Variable) -> Iterable[Variable]:
         else:
             still_open.pop()
             # push var to head of variables
-            if not var.is_constant() and not var.name in variables_names:
+            if not var.is_constant() and var.name not in variables_names:
                 variables.append(var)
                 variables_names.add(var.name)
     variables.reverse()
@@ -82,19 +82,18 @@ def topological_sort(variable: Variable) -> Iterable[Variable]:
 
 
 def backpropagate(variable: Variable, deriv: Any) -> None:
-    """Runs backpropagation on the computation graph in order to
-    compute derivatives for the leave nodes.
+    """Runs backpropagation on the computation graph to compute derivatives for the leaf nodes.
 
     Args:
     ----
-        variable: The right-most variable
-        deriv  : Its derivative that we want to propagate backward to the leaves.
+    variable (Variable): The right-most variable (end of the computation graph) where backpropagation starts.
+    deriv (Any): The derivative of the output variable with respect to itself, typically initialized to 1.0 when starting the backpropagation process.
 
-    No return. Should write to its results to the derivative values of each leaf through `accumulate_derivative`.
+    No return. This function writes the computed derivatives to the `derivative` attribute
+    of each leaf variable through the `accumulate_derivative` method.
 
     """
     variables = topological_sort(variable=variable)
-    print(list(map(lambda x: x.name, variables)))
     derivatives = {variables[0].unique_id: deriv}
 
     for var in variables:
@@ -124,5 +123,5 @@ class Context:
         self.saved_values = values
 
     @property
-    def saved_tensors(self) -> Tuple[Any, ...]:
+    def saved_tensors(self) -> Tuple[Any, ...]:  # noqa: D102
         return self.saved_values
