@@ -69,8 +69,9 @@ def topological_sort(variable: Variable) -> Iterable[Variable]:
         if first_visit:
             # set first_visit = False
             still_open[-1] = (still_open[-1][0], False)
-            # add previous variables with first_visit = True
-            still_open.extend(zip(var.parents, [True] * len(var.parents)))
+            if not var.is_constant():
+                # add previous variables with first_visit = True
+                still_open.extend(zip(var.parents, [True] * len(var.parents)))
         else:
             still_open.pop()
             # push var to head of variables
